@@ -257,28 +257,15 @@ _CSP_DIRECTIVES = {
     'worker-src': ("'self'", 'blob:'),
 }
 
-_DIRECTIVE_SETTING_MAP = {
-    'default-src': 'CSP_DEFAULT_SRC',
-    'script-src': 'CSP_SCRIPT_SRC',
-    'script-src-elem': 'CSP_SCRIPT_SRC_ELEM',
-    'style-src': 'CSP_STYLE_SRC',
-    'style-src-elem': 'CSP_STYLE_SRC_ELEM',
-    'img-src': 'CSP_IMG_SRC',
-    'font-src': 'CSP_FONT_SRC',
-    'connect-src': 'CSP_CONNECT_SRC',
-    'frame-src': 'CSP_FRAME_SRC',
-    'object-src': 'CSP_OBJECT_SRC',
-    'base-uri': 'CSP_BASE_URI',
-    'form-action': 'CSP_FORM_ACTION',
-    'frame-ancestors': 'CSP_FRAME_ANCESTORS',
-    'worker-src': 'CSP_WORKER_SRC',
-}
+_CSP_CONFIG = {'DIRECTIVES': _CSP_DIRECTIVES}
 
-for directive, values in _CSP_DIRECTIVES.items():
-    globals()[_DIRECTIVE_SETTING_MAP[directive]] = values
+CONTENT_SECURITY_POLICY = None
+CONTENT_SECURITY_POLICY_REPORT_ONLY = None
 
-# 개발 환경에서는 보고 모드로만 동작
-CSP_REPORT_ONLY = DEBUG
+if DEBUG:
+    CONTENT_SECURITY_POLICY_REPORT_ONLY = _CSP_CONFIG
+else:
+    CONTENT_SECURITY_POLICY = _CSP_CONFIG
 
 # 추가 보안 헤더
 SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
