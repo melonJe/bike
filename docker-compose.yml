@@ -46,7 +46,7 @@ services:
   graphhopper:
     build:
       context: ./graphhopper
-      dockerfile: Dockerfile.graphHopper
+      dockerfile: dockerfile.graphhopper
       args:
         GH_VERSION: "10.0"
     image: graphhopper:10.0

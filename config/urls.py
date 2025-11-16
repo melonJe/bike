@@ -14,20 +14,21 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.conf import settings
 from django.contrib import admin
-from django.urls import path, include
-from django.views.generic import TemplateView
+from django.urls import include, path
 
-from api.views import round_trip_route
+from rest_framework.routers import DefaultRouter
 
-frontpage_view = TemplateView.as_view(
-    template_name='index.html',
-    extra_context={'mapbox': settings.MAPBOX},
-)
+from api.views.favorites import FavoriteRouteViewSet
+from api.views.routes import RoundTripRouteView
+from .views import FrontpageView
+
+router = DefaultRouter()
+router.register('favorites', FavoriteRouteViewSet, basename='favorite-route')
 
 urlpatterns = [
-    path('', frontpage_view),
+    path('', FrontpageView.as_view()),
     path('admin/', admin.site.urls),
-    path('api/paths/route/', round_trip_route, name='api-round-trip-route'),
+    path('api/paths/route/', RoundTripRouteView.as_view(), name='api-round-trip-route'),
+    path('api/', include(router.urls)),
 ]

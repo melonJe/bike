@@ -75,7 +75,7 @@ def request_round_trip_route(options: RoundTripOptions) -> Dict[str, Any]:
         'algorithm': settings.GRAPHHOPPER.get('ALGORITHM', 'round_trip'),
         'ch.disable': str(settings.GRAPHHOPPER.get('CH_DISABLE', 'true')).lower(),
         'round_trip.distance': distance_meters,
-        'points_encoded': options.points_encoded,
+        'points_encoded': str(bool(options.points_encoded)).lower(),
     }
 
     payload = _request_json('/route', params)

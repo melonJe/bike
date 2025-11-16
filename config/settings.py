@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import os
+from copy import deepcopy
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -61,7 +62,7 @@ def _parse_int_env(key: str, default: int) -> int:
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY','')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DJANGO_DEBUG', 'True').lower() in {'1', 'true', 'yes', 'on'}
+DEBUG = os.getenv('DJANGO_DEBUG', 'False').lower() in {'1', 'true', 'yes', 'on'}
 
 ALLOWED_HOSTS = [
     host.strip()
@@ -80,6 +81,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'csp',
+    'rest_framework',
     'api',
 ]
 
@@ -199,7 +201,15 @@ _CONTENT_SECURITY_POLICY_DIRECTIVES = {
         "'self'",
         "'unsafe-inline'",  # Django admin과 일부 라이브러리를 위해 필요
         "'unsafe-eval'",    # 일부 라이브러리를 위해 필요
-        "'strict-dynamic'",  # 동적 스크립트 로딩 허용
+        'https://static.cloudflareinsights.com',
+        'https://challenges.cloudflare.com',
+        'https://bike.meloncaput.com',
+        'https://api.mapbox.com',
+    ),
+    'script-src-elem': (
+        "'self'",
+        "'unsafe-inline'",
+        "'unsafe-eval'",
         'https://static.cloudflareinsights.com',
         'https://challenges.cloudflare.com',
         'https://bike.meloncaput.com',
@@ -208,6 +218,12 @@ _CONTENT_SECURITY_POLICY_DIRECTIVES = {
     'style-src': (
         "'self'",
         "'unsafe-inline'",  # 인라인 스타일을 사용하는 경우 필요
+        'https://bike.meloncaput.com',
+        'https://api.mapbox.com',
+    ),
+    'style-src-elem': (
+        "'self'",
+        "'unsafe-inline'",
         'https://bike.meloncaput.com',
         'https://api.mapbox.com',
     ),
@@ -243,11 +259,14 @@ _CONTENT_SECURITY_POLICY_DIRECTIVES = {
 }
 
 # CSP 설정 (django-csp >= 4.0)
-CONTENT_SECURITY_POLICY = _CONTENT_SECURITY_POLICY_DIRECTIVES
+CONTENT_SECURITY_POLICY = None
+CONTENT_SECURITY_POLICY_REPORT_ONLY = None
 
-# 개발 환경에서는 CSP 보고서만 전송하고 차단하지 않음
 if DEBUG:
-    CONTENT_SECURITY_POLICY_REPORT_ONLY = True
+    # 개발 환경에서는 CSP 보고서만 전송하고 차단하지 않음
+    CONTENT_SECURITY_POLICY_REPORT_ONLY = deepcopy(_CONTENT_SECURITY_POLICY_DIRECTIVES)
+else:
+    CONTENT_SECURITY_POLICY = _CONTENT_SECURITY_POLICY_DIRECTIVES
 
 # 추가 보안 헤더
 SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'

@@ -9,43 +9,763 @@
     <link
       rel="stylesheet"
       href="https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.css"
-      integrity="sha384-kIyr29M9F7RPNbwGLbW+tIapWIRD5smQ/RQxcsfP7JYpQm9lUPQsLkS4XBebqn3x"
       crossorigin="anonymous"
     />
     {% if mapbox.ACCESS_TOKEN %}
       <script
+        id="mapbox-gl-js"
         src="https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.js"
-        integrity="sha384-rXNUz1OjpWjnFzAsa/4XGPvajdrWlXvBoXGI+p/1c/bHv+I5F/vN0p3gsB/B0bkg"
         crossorigin="anonymous"
         defer
       ></script>
     {% endif %}
   </head>
   <body>
-    <main>
-      <h1>Bike App Frontend</h1>
-      <p>정적 자산과 템플릿이 Django에 포팅되었습니다.</p>
-      <section id="map" aria-label="Mapbox 지도">
-        <noscript>지도를 확인하려면 JavaScript를 활성화하세요.</noscript>
+    <main class="app-shell">
+      <section class="side-button-bar" aria-label="주요 기능">
+        <div class="side-button-bar__buttons" role="tablist" aria-orientation="vertical">
+          <button class="side-button is-active" data-mode="circular" role="tab" aria-selected="true">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M22.875,12a4.875,4.875,0,0,1-8.325,3.45q-0.008,0-0.016,-0.017L8.908,9.082a4.125,4.125,0,1,0,0,5.847l0.808,-0.91a0.375,0.375,0,1,1,0.561,0.498l-0.814,0.92q-0.008,0.008,-0.016,0.017a4.875,4.875,0,1,1,0-6.891q0.008,0.008,0.016,0.017l5.628,6.347a4.125,4.125,0,1,0,0-5.847l-0.808,0.91a0.375,0.375,0,1,1-0.561,-0.498l0.814,-0.92q0.008,-0.008,0.016,-0.017A4.875,4.875,0,0,1,22.875,12Z"
+              />
+            </svg>
+            <span class="sr-only">루프 경로</span>
+          </button>
+          <button class="side-button" data-mode="directions" role="tab" aria-selected="false">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span class="sr-only">길찾기</span>
+          </button>
+          <button class="side-button" data-mode="popularity" role="tab" aria-selected="false">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+              />
+            </svg>
+            <span class="sr-only">인기 경로</span>
+          </button>
+          <button class="side-button" data-mode="favorites" role="tab" aria-selected="false">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M11.245 4.174C11.4765 3.50808 11.5922 3.17513 11.7634 3.08285C11.9115 3.00298 12.0898 3.00298 12.238 3.08285C12.4091 3.17513 12.5248 3.50808 12.7563 4.174L14.2866 8.57639C14.3525 8.76592 14.3854 8.86068 14.4448 8.93125C14.4972 8.99359 14.5641 9.04218 14.6396 9.07278C14.725 9.10743 14.8253 9.10947 15.0259 9.11356L19.6857 9.20852C20.3906 9.22288 20.743 9.23007 20.8837 9.36432C21.0054 9.48051 21.0605 9.65014 21.0303 9.81569C20.9955 10.007 20.7146 10.2199 20.1528 10.6459L16.4387 13.4616C16.2788 13.5829 16.1989 13.6435 16.1501 13.7217C16.107 13.7909 16.0815 13.8695 16.0757 13.9507C16.0692 14.0427 16.0982 14.1387 16.1563 14.3308L17.506 18.7919C17.7101 19.4667 17.8122 19.8041 17.728 19.9793C17.6551 20.131 17.5108 20.2358 17.344 20.2583C17.1513 20.2842 16.862 20.0829 16.2833 19.6802L12.4576 17.0181C12.2929 16.9035 12.2106 16.8462 12.1211 16.8239C12.042 16.8043 11.9593 16.8043 11.8803 16.8239C11.7908 16.8462 11.7084 16.9035 11.5437 17.0181L7.71805 19.6802C7.13937 20.0829 6.85003 20.2842 6.65733 20.2583C6.49056 20.2358 6.34626 20.131 6.27337 19.9793C6.18915 19.8041 6.29123 19.4667 6.49538 18.7919L7.84503 14.3308C7.90313 14.1387 7.93218 14.0427 7.92564 13.9507C7.91986 13.8695 7.89432 13.7909 7.85123 13.7217C7.80246 13.6435 7.72251 13.5829 7.56262 13.4616L3.84858 10.6459C3.28678 10.2199 3.00588 10.007 2.97101 9.81569C2.94082 9.65014 2.99594 9.48051 3.11767 9.36432C3.25831 9.23007 3.61074 9.22289 4.31559 9.20852L8.9754 9.11356C9.176 9.10947 9.27631 9.10743 9.36177 9.07278C9.43726 9.04218 9.50414 8.99359 9.55657 8.93125C9.61593 8.86068 9.64887 8.76592 9.71475 8.57639L11.245 4.174Z"
+              ></path>
+            </svg>
+            <span class="sr-only">즐겨찾기</span>
+          </button>
+          <button class="side-button" data-mode="history" role="tab" aria-selected="false" aria-disabled="true" title="게스트 모드에서는 사용할 수 없어요">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span class="sr-only">주행 기록</span>
+          </button>
+        </div>
+        <div class="side-button-bar__footer">
+          <button class="primary-action" type="button">로그인</button>
+        </div>
+      </section>
+
+      <section class="sidebar" aria-live="polite">
+        <div class="sidebar__panels">
+          <article class="sidebar-panel is-active" data-mode="circular">
+            <div class="panel-head">
+              <p class="eyebrow">루프 경로</p>
+              <h2>출발지로 돌아오는 코스</h2>
+              <p>출발지와 시간을 입력하면 왕복 루트를 생성합니다.</p>
+            </div>
+            <form class="panel-form" aria-label="루프 경로 생성 폼">
+              <label class="form-field">
+                <span>현재 위치</span>
+                <input type="text" name="loop-start" placeholder="예) 서울시청" value="서울시청" />
+              </label>
+              <label class="form-field">
+                <span>목표 시간 (분)</span>
+                <input type="number" name="loop-duration" min="10" max="240" value="30" />
+              </label>
+            </form>
+            <div class="panel-card panel-card--warning" role="status">
+              <strong>무료 사용자 안내</strong>
+              <p>일일 3회 제한이 적용됩니다. Pro 이상 구독 시 무제한 생성이 가능합니다.</p>
+            </div>
+            <div class="panel-actions">
+              <button type="button" class="btn btn--primary" data-action="generate-loop-route">경로 생성하기</button>
+            </div>
+            <p class="hint-text">생성된 경로 정보와 즐겨찾기 버튼은 오른쪽 패널에서 확인할 수 있습니다.</p>
+            <div class="panel-card">
+              <h3>사용법</h3>
+              <ul class="bullet-list">
+                <li>지도에서 우클릭 후 “출발”을 선택하면 좌표가 자동 입력됩니다.</li>
+                <li>목표 시간을 조정하면 거리·고도 편차를 즉시 재계산합니다.</li>
+                <li>완료된 루트는 즐겨찾기로 저장하거나 GPX로 내보낼 수 있습니다.</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="sidebar-panel" data-mode="directions">
+            <div class="panel-head">
+              <p class="eyebrow">길찾기</p>
+              <h2>이동</h2>
+              <p>출발·도착지를 지정하고 우선순위를 선택하세요.</p>
+            </div>
+            <form class="panel-form" aria-label="길찾기 폼">
+              <label class="form-field">
+                <span>현재 위치</span>
+                <input type="text" name="directions-start" placeholder="출발지를 입력하거나 지도에서 우클릭" />
+              </label>
+              <label class="form-field">
+                <span>도착지</span>
+                <input type="text" name="directions-end" placeholder="도착지를 입력하세요" />
+              </label>
+            </form>
+            <div class="option-buttons" role="toolbar" aria-label="경로 옵션">
+              <button type="button" class="option-button is-active">최단시간</button>
+              <button type="button" class="option-button">최단거리</button>
+              <button type="button" class="option-button">자전거도로</button>
+            </div>
+            <button type="button" class="btn btn--primary">경로 검색</button>
+            <div class="panel-card">
+              <p class="hint-text">우클릭으로 지정한 마커를 드래그하면 새 좌표에 맞춰 주소가 자동 업데이트됩니다.</p>
+            </div>
+          </article>
+
+          <article class="sidebar-panel" data-mode="popularity">
+            <div class="panel-head">
+              <p class="eyebrow">인기 경로</p>
+              <h2>주변 라이더 추천</h2>
+              <p>위치 기반으로 5km 이내에서 많이 달린 코스를 보여줍니다.</p>
+            </div>
+            <div class="route-list">
+              <article class="route-card">
+                <div class="route-card__body">
+                  <h3>한강 루프 25K</h3>
+                  <p>거리 25km · 예상 1h 10m</p>
+                </div>
+                <div class="route-card__meta">
+                  <span class="tag">안전 시설</span>
+                  <button type="button" class="btn btn--ghost">공유</button>
+                </div>
+              </article>
+              <article class="route-card">
+                <div class="route-card__body">
+                  <h3>북악 스카이웨이</h3>
+                  <p>거리 18km · 예상 58m</p>
+                </div>
+                <div class="route-card__meta">
+                  <span class="tag">언덕</span>
+                  <button type="button" class="btn btn--ghost">공유</button>
+                </div>
+              </article>
+              <article class="route-card">
+                <div class="route-card__body">
+                  <h3>과천-의왕 자전거길</h3>
+                  <p>거리 32km · 예상 1h 40m</p>
+                </div>
+                <div class="route-card__meta">
+                  <span class="tag">야경</span>
+                  <button type="button" class="btn btn--ghost">공유</button>
+                </div>
+              </article>
+            </div>
+          </article>
+
+          <article class="sidebar-panel" data-mode="favorites">
+            <div class="panel-head">
+              <p class="eyebrow">즐겨찾기</p>
+              <h2>자주 타는 루트</h2>
+              <p>태그와 색상으로 분류하고 동료와 공유하세요.</p>
+            </div>
+            <div class="route-list" data-favorite-list>
+              {% if favorites %}
+                {% for favorite in favorites %}
+                  <article class="route-card" data-favorite-id="{{ favorite.id }}">
+                    <div class="route-card__body">
+                      <h3>
+                        <button
+                          type="button"
+                          class="favorite-link"
+                          data-action="open-favorite-detail"
+                          data-favorite-id="{{ favorite.id }}"
+                        >
+                          {{ favorite.name }}
+                        </button>
+                      </h3>
+                      <p>
+                        {% if favorite.distance_km %}거리 {{ favorite.distance_km|floatformat:2 }}km{% else %}거리 정보 없음{% endif %}
+                        {% if favorite.duration_minutes %} · 예상 {{ favorite.duration_minutes }}분{% endif %}
+                      </p>
+                    </div>
+                    <div class="route-card__meta">
+                      <span class="tag">#{{ favorite.route_type }}</span>
+                      <div class="route-card__actions">
+                        <button type="button" class="btn btn--ghost" data-action="share-favorite" data-favorite-id="{{ favorite.id }}">공유</button>
+                        <button type="button" class="btn btn--ghost" data-action="delete-favorite" data-favorite-id="{{ favorite.id }}" aria-label="삭제">삭제</button>
+                      </div>
+                    </div>
+                  </article>
+                {% endfor %}
+              {% else %}
+                <p class="hint-text" data-favorite-empty>아직 즐겨찾기 경로가 없습니다. 루프 경로를 생성해 추가해 보세요.</p>
+              {% endif %}
+            </div>
+            <button type="button" class="btn btn--primary" disabled aria-disabled="true">새 루트 추가 (준비 중)</button>
+          </article>
+
+          <article class="sidebar-panel" data-mode="history">
+            <div class="panel-head">
+              <p class="eyebrow">주행 기록</p>
+              <h2>지난 라이딩 다시 보기</h2>
+              <p>날짜별 기록을 선택하면 지도에 궤적이 표시됩니다.</p>
+            </div>
+            <div class="history-list" role="list">
+              <button type="button" class="history-item" data-history-id="1">
+                <strong>한강 라이딩</strong>
+                <span>2023-10-26 · 25km</span>
+              </button>
+              <button type="button" class="history-item" data-history-id="2">
+                <strong>북악 스카이웨이</strong>
+                <span>2023-10-24 · 18km</span>
+              </button>
+              <button type="button" class="history-item" data-history-id="3">
+                <strong>과천-의왕 자전거길</strong>
+                <span>2023-10-22 · 32km</span>
+              </button>
+            </div>
+            <div class="panel-card">
+              <p class="hint-text">GPX · FIT 포맷으로 다운로드해 다른 기기에서도 재생할 수 있습니다.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="sidebar sidebar--detail" data-route-detail-panel hidden aria-label="생성된 경로 정보">
+        <div class="route-detail">
+          <div class="route-detail__header">
+            <div>
+              <p class="eyebrow">생성된 경로</p>
+              <h3 data-route-detail-field="name">루프 경로</h3>
+            </div>
+            <button type="button" class="detail-close-button" data-action="close-route-detail" aria-label="경로 정보 닫기">
+              ×
+            </button>
+          </div>
+          <dl class="route-detail__stats">
+            <div>
+              <dt>거리</dt>
+              <dd data-route-detail-field="distance">-- km</dd>
+            </div>
+            <div>
+              <dt>예상 시간</dt>
+              <dd data-route-detail-field="duration">-- 분</dd>
+            </div>
+            <div>
+              <dt>상승고도</dt>
+              <dd data-route-detail-field="ascend">-- m</dd>
+            </div>
+            <div>
+              <dt>하강고도</dt>
+              <dd data-route-detail-field="descend">-- m</dd>
+            </div>
+          </dl>
+          <p class="hint-text" data-route-detail-field="meta">경로를 생성하면 상세 정보가 표시됩니다.</p>
+          <button type="button" class="btn btn--ghost" data-action="save-loop-favorite" data-default-label="즐겨찾기 저장" aria-disabled="true">즐겨찾기 저장</button>
+        </div>
+      </section>
+
+      <section class="map-area" aria-label="지도 영역">
+        <div id="map" aria-label="Mapbox 지도">
+          <noscript>지도를 확인하려면 JavaScript를 활성화하세요.</noscript>
+        </div>
       </section>
     </main>
+    {{ favorites_json|json_script:"favorite-data" }}
     {{ mapbox|json_script:"mapbox-config" }}
     <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        const configElement = document.getElementById('mapbox-config');
-        if (!configElement) {
-          console.error('Mapbox 설정을 찾을 수 없습니다.');
+      const MODES = ['circular', 'directions', 'popularity', 'favorites', 'history'];
+      const API_ENDPOINTS = {
+        roundTrip: '/api/paths/route/',
+        favorites: '/api/favorites/',
+      };
+      const ROUTE_SOURCE_ID = 'generated-route';
+      let mapInstance = null;
+      let latestLoopRoute = null;
+      let routeDetailPanel = null;
+      let routeDetailFields = {};
+      let routeDetailSaveButton = null;
+      let favoriteCache = [];
+
+      const defaultRouteDetailContent = {
+        name: '루프 경로',
+        distance: '-- km',
+        duration: '-- 분',
+        ascend: '-- m',
+        descend: '-- m',
+        meta: '경로를 생성하면 상세 정보가 표시됩니다.',
+      };
+
+      const getCsrfToken = () => {
+        const match = document.cookie.match(/csrftoken=([^;]+)/);
+        return match ? decodeURIComponent(match[1]) : '';
+      };
+
+      const applyRouteDetailContent = (content = {}) => {
+        Object.entries(routeDetailFields).forEach(([key, node]) => {
+          if (!node) {
+            return;
+          }
+          const fallback = defaultRouteDetailContent[key] ?? '';
+          node.textContent = content[key] ?? fallback;
+        });
+      };
+
+      const resetRouteDetailContent = () => {
+        applyRouteDetailContent();
+      };
+
+      const toggleRouteDetailPanel = isVisible => {
+        if (!routeDetailPanel) {
+          return;
+        }
+        routeDetailPanel.hidden = !isVisible;
+      };
+
+      const initRouteDetailPanel = () => {
+        routeDetailPanel = document.querySelector('[data-route-detail-panel]');
+        if (!routeDetailPanel) {
+          return;
+        }
+        routeDetailFields = {
+          name: routeDetailPanel.querySelector('[data-route-detail-field="name"]'),
+          distance: routeDetailPanel.querySelector('[data-route-detail-field="distance"]'),
+          duration: routeDetailPanel.querySelector('[data-route-detail-field="duration"]'),
+          ascend: routeDetailPanel.querySelector('[data-route-detail-field="ascend"]'),
+          descend: routeDetailPanel.querySelector('[data-route-detail-field="descend"]'),
+          meta: routeDetailPanel.querySelector('[data-route-detail-field="meta"]'),
+        };
+        routeDetailSaveButton = routeDetailPanel.querySelector('[data-action="save-loop-favorite"]');
+        const closeButton = routeDetailPanel.querySelector('[data-action="close-route-detail"]');
+        closeButton?.addEventListener('click', () => {
+          toggleRouteDetailPanel(false);
+          resetRouteDetailContent();
+          setSaveButtonState(routeDetailSaveButton, false);
+          latestLoopRoute = null;
+        });
+        toggleRouteDetailPanel(false);
+        resetRouteDetailContent();
+      };
+
+      const updateRouteDetailPanelContent = summary => {
+        applyRouteDetailContent(summary);
+        toggleRouteDetailPanel(true);
+      };
+
+      const formatDistanceKm = meters => {
+        if (typeof meters !== 'number' || Number.isNaN(meters)) {
+          return '-- km';
+        }
+        return `${(meters / 1000).toFixed(2)} km`;
+      };
+
+      const formatDurationMinutes = minutes => {
+        if (typeof minutes !== 'number' || Number.isNaN(minutes)) {
+          return '-- 분';
+        }
+        return `${minutes} 분`;
+      };
+
+      const formatElevation = value => {
+        if (typeof value !== 'number' || Number.isNaN(value)) {
+          return '-- m';
+        }
+        return `${Math.round(value)} m`;
+      };
+
+      const activateMode = mode => {
+        const buttons = document.querySelectorAll('.side-button');
+        const panels = document.querySelectorAll('.sidebar-panel');
+
+        buttons.forEach(button => {
+          const isActive = button.dataset.mode === mode;
+          button.classList.toggle('is-active', isActive);
+          button.setAttribute('aria-selected', String(isActive));
+        });
+
+        panels.forEach(panel => {
+          panel.classList.toggle('is-active', panel.dataset.mode === mode);
+        });
+      };
+
+      const initSidebarInteractions = () => {
+        const buttonContainer = document.querySelector('.side-button-bar__buttons');
+        buttonContainer?.addEventListener('click', event => {
+          const target = event.target.closest('.side-button');
+          if (!target || target.getAttribute('aria-disabled') === 'true') {
+            return;
+          }
+          event.preventDefault();
+          activateMode(target.dataset.mode || 'circular');
+        });
+
+        const loginButton = document.querySelector('.primary-action');
+        loginButton?.addEventListener('click', () => {
+          loginButton.classList.toggle('is-outline');
+          loginButton.textContent = loginButton.classList.contains('is-outline') ? '게스트로 계속' : '로그인';
+        });
+
+        const optionButtons = document.querySelectorAll('.option-button');
+        optionButtons.forEach(button => {
+          button.addEventListener('click', () => {
+            optionButtons.forEach(btn => btn.classList.remove('is-active'));
+            button.classList.add('is-active');
+          });
+        });
+
+        const historyItems = document.querySelectorAll('.history-item');
+        historyItems.forEach(item => {
+          item.addEventListener('click', () => {
+            historyItems.forEach(btn => btn.classList.remove('is-active'));
+            item.classList.add('is-active');
+          });
+        });
+
+        activateMode('circular');
+      };
+
+      const getFavoriteById = favoriteId =>
+        favoriteCache.find(entry => entry.id === favoriteId || entry.id === String(favoriteId));
+
+      const renderFavoriteOnMap = favorite => {
+        const coordinates = favorite?.metadata?.coordinates;
+        if (!Array.isArray(coordinates) || !coordinates.length) {
+          window.alert('저장된 경로에 좌표 정보가 없어 지도를 표시할 수 없습니다.');
+          return;
+        }
+        drawRouteOnMap(coordinates);
+        updateRouteDetailPanelContent({
+          name: favorite.name,
+          distance: favorite.distance_km ? `${Number(favorite.distance_km).toFixed(2)} km` : '-- km',
+          duration: favorite.duration_minutes ? `${favorite.duration_minutes} 분` : '-- 분',
+          ascend: favorite.metadata?.ascend ? `${Math.round(favorite.metadata.ascend)} m` : '-- m',
+          descend: favorite.metadata?.descend ? `${Math.round(favorite.metadata.descend)} m` : '-- m',
+          meta: favorite.metadata?.bbox ? '저장된 경로를 불러왔습니다.' : '저장된 경로 세부 정보를 확인하세요.',
+        });
+        setSaveButtonState(routeDetailSaveButton, false);
+        latestLoopRoute = null;
+      };
+
+      const setFavoriteCache = entries => {
+        favoriteCache = Array.isArray(entries) ? [...entries] : [];
+      };
+
+      const removeFavoriteFromCache = favoriteId => {
+        setFavoriteCache(favoriteCache.filter(item => String(item.id) !== String(favoriteId)));
+      };
+
+      const updateFavoriteEmptyState = () => {
+        const list = document.querySelector('[data-favorite-list]');
+        const emptyElement = list?.querySelector('[data-favorite-empty]');
+        const hasCards = !!list?.querySelector('.route-card');
+        if (emptyElement) {
+          emptyElement.hidden = hasCards;
+        }
+      };
+
+      const deleteFavorite = async favoriteId => {
+        const headers = { Accept: 'application/json' };
+        const csrfToken = getCsrfToken();
+        if (csrfToken) {
+          headers['X-CSRFToken'] = csrfToken;
+        }
+        const response = await fetch(`${API_ENDPOINTS.favorites}${favoriteId}/`, {
+          method: 'DELETE',
+          headers,
+        });
+        if (!response.ok) {
+          throw new Error('즐겨찾기를 삭제할 수 없습니다. 다시 시도해 주세요.');
+        }
+      };
+
+      const initFavoritePanelInteractions = () => {
+        const favoriteList = document.querySelector('[data-favorite-list]');
+        if (!favoriteList) {
           return;
         }
 
-        let config;
-        try {
-          config = JSON.parse(configElement.textContent || '{}');
-        } catch (error) {
-          console.error('Mapbox 설정 파싱에 실패했습니다.', error);
+        favoriteList.addEventListener('click', event => {
+          const link = event.target.closest('[data-action="open-favorite-detail"]');
+          if (link) {
+            event.preventDefault();
+            const favoriteId = link.dataset.favoriteId;
+            const favorite = getFavoriteById(favoriteId);
+            if (!favorite) {
+              window.alert('즐겨찾기 데이터를 찾을 수 없습니다. 페이지를 새로고침해 주세요.');
+              return;
+            }
+            renderFavoriteOnMap(favorite);
+            return;
+          }
+
+          const deleteButton = event.target.closest('[data-action="delete-favorite"]');
+          if (deleteButton) {
+            event.preventDefault();
+            const favoriteId = deleteButton.dataset.favoriteId;
+            if (!favoriteId) {
+              return;
+            }
+            if (!window.confirm('이 즐겨찾기 경로를 삭제할까요?')) {
+              return;
+            }
+            deleteButton.disabled = true;
+            deleteButton.textContent = '삭제 중...';
+            deleteFavorite(favoriteId)
+              .then(() => {
+                removeFavoriteFromCache(favoriteId);
+                const card = deleteButton.closest('.route-card');
+                card?.remove();
+                updateFavoriteEmptyState();
+                if (routeDetailPanel && !routeDetailPanel.hidden) {
+                  const detailName = routeDetailFields?.name?.textContent;
+                  const favorite = getFavoriteById(favoriteId);
+                  if (!favorite && detailName && detailName.trim() === deleteButton.dataset.favoriteName) {
+                    toggleRouteDetailPanel(false);
+                    resetRouteDetailContent();
+                  }
+                }
+              })
+              .catch(error => {
+                console.error(error);
+                window.alert(error.message || '즐겨찾기 삭제 중 오류가 발생했습니다.');
+              })
+              .finally(() => {
+                deleteButton.textContent = '삭제';
+                deleteButton.disabled = false;
+              });
+          }
+        });
+      };
+
+      const requestRoundTripRoute = async ({ lat, lon, minutes }) => {
+        const query = new URLSearchParams({
+          lat: String(lat),
+          lon: String(lon),
+          minutes: String(minutes),
+          points_encoded: 'false',
+        });
+        const response = await fetch(`${API_ENDPOINTS.roundTrip}?${query.toString()}`, {
+          headers: { Accept: 'application/json' },
+        });
+        const data = await response.json().catch(() => null);
+        if (!response.ok || !data) {
+          const message = data?.detail || data?.error || '경로 생성에 실패했습니다.';
+          throw new Error(message);
+        }
+        return data;
+      };
+
+      const fitMapToRoute = (map, coordinates) => {
+        if (!map || !Array.isArray(coordinates) || !coordinates.length) {
+          return;
+        }
+        const bounds = coordinates.reduce((acc, coord) => {
+          if (!Array.isArray(coord) || coord.length < 2) {
+            return acc;
+          }
+          const [lng, lat] = coord;
+          if (!acc) {
+            return new window.mapboxgl.LngLatBounds([lng, lat], [lng, lat]);
+          }
+          acc.extend([lng, lat]);
+          return acc;
+        }, null);
+        if (bounds) {
+          map.fitBounds(bounds, { padding: 48, duration: 800, maxZoom: 15 });
+        }
+      };
+
+      const drawRouteOnMap = coordinates => {
+        if (!mapInstance) {
+          console.warn('지도 초기화가 완료되지 않았습니다.');
           return;
         }
 
+        const render = () => {
+          const data = {
+            type: 'Feature',
+            geometry: {
+              type: 'LineString',
+              coordinates,
+            },
+          };
+
+          if (mapInstance.getSource(ROUTE_SOURCE_ID)) {
+            mapInstance.getSource(ROUTE_SOURCE_ID).setData(data);
+          } else {
+            mapInstance.addSource(ROUTE_SOURCE_ID, { type: 'geojson', data });
+            mapInstance.addLayer({
+              id: ROUTE_SOURCE_ID,
+              type: 'line',
+              source: ROUTE_SOURCE_ID,
+              layout: { 'line-cap': 'round', 'line-join': 'round' },
+              paint: {
+                'line-color': '#2563eb',
+                'line-width': 4,
+                'line-opacity': 0.85,
+              },
+            });
+          }
+          fitMapToRoute(mapInstance, coordinates);
+        };
+
+        if (!mapInstance.isStyleLoaded()) {
+          mapInstance.once('load', render);
+        } else {
+          render();
+        }
+      };
+
+      const setSaveButtonState = (button, isEnabled) => {
+        if (!button) return;
+        button.disabled = !isEnabled;
+        button.setAttribute('aria-disabled', String(!isEnabled));
+        const defaultLabel = button.dataset.defaultLabel || button.textContent || '즐겨찾기 저장';
+        button.textContent = defaultLabel;
+      };
+
+      const saveFavoriteRoute = async payload => {
+        const headers = { 'Content-Type': 'application/json', Accept: 'application/json' };
+        const csrfToken = getCsrfToken();
+        if (csrfToken) {
+          headers['X-CSRFToken'] = csrfToken;
+        }
+        const response = await fetch(API_ENDPOINTS.favorites, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(payload),
+        });
+        const data = await response.json().catch(() => null);
+        if (!response.ok) {
+          const message = data?.detail || data?.error || '즐겨찾기 저장에 실패했습니다.';
+          throw new Error(message);
+        }
+        return data;
+      };
+
+      const initLoopRouteActions = config => {
+        const panel = document.querySelector('.sidebar-panel[data-mode="circular"]');
+        if (!panel) return;
+
+        const generateButton = panel.querySelector('[data-action="generate-loop-route"]');
+        const saveButton = routeDetailSaveButton;
+        const startInput = panel.querySelector('input[name="loop-start"]');
+        const durationInput = panel.querySelector('input[name="loop-duration"]');
+
+        setSaveButtonState(saveButton, false);
+
+        const handleGenerate = async () => {
+          if (!durationInput) return;
+          const minutes = Math.max(1, parseInt(durationInput.value, 10) || 30);
+          const center = mapInstance?.getCenter();
+          const lat = center?.lat ?? Number(config.CENTER_LAT);
+          const lon = center?.lng ?? Number(config.CENTER_LNG);
+
+          setSaveButtonState(saveButton, false);
+          latestLoopRoute = null;
+          resetRouteDetailContent();
+          toggleRouteDetailPanel(false);
+
+          if (generateButton) {
+            generateButton.disabled = true;
+            generateButton.textContent = '생성 중...';
+          }
+
+          try {
+            const routeData = await requestRoundTripRoute({ lat, lon, minutes });
+            if (!Array.isArray(routeData.coordinates) || !routeData.coordinates.length) {
+              throw new Error('경로 좌표를 찾을 수 없습니다.');
+            }
+
+            drawRouteOnMap(routeData.coordinates);
+
+            const startLabel = startInput?.value?.trim() || '루프 경로';
+            const distanceKm = typeof routeData.distance_meters === 'number' ? Number((routeData.distance_meters / 1000).toFixed(2)) : null;
+            const durationMinutes = routeData.duration_ms ? Math.max(1, Math.round(routeData.duration_ms / 60000)) : minutes;
+            const ascendMeters = typeof routeData.ascend === 'number' ? routeData.ascend : null;
+            const descendMeters = typeof routeData.descend === 'number' ? routeData.descend : null;
+
+            latestLoopRoute = {
+              name: startLabel,
+              route_type: 'loop',
+              start_point: startInput?.value || '',
+              end_point: startInput?.value || '',
+              distance_km: distanceKm,
+              duration_minutes: durationMinutes,
+              metadata: {
+                bbox: routeData.bbox,
+                ascend: routeData.ascend,
+                descend: routeData.descend,
+                coordinates: routeData.coordinates,
+              },
+            };
+
+            updateRouteDetailPanelContent({
+              name: startLabel,
+              distance: formatDistanceKm(routeData.distance_meters),
+              duration: formatDurationMinutes(durationMinutes),
+              ascend: formatElevation(ascendMeters),
+              descend: formatElevation(descendMeters),
+              meta: `${distanceKm ?? '--'}km · 약 ${durationMinutes ?? '--'}분`,
+            });
+            setSaveButtonState(saveButton, true);
+          } catch (error) {
+            console.error(error);
+            window.alert(error.message || '경로 생성에 실패했습니다.');
+          } finally {
+            if (generateButton) {
+              generateButton.disabled = false;
+              generateButton.textContent = '경로 생성하기';
+            }
+          }
+        };
+
+        const handleSaveFavorite = async () => {
+          if (!latestLoopRoute) {
+            window.alert('먼저 경로를 생성해 주세요.');
+            return;
+          }
+          if (!saveButton) {
+            return;
+          }
+
+          saveButton.disabled = true;
+          saveButton.setAttribute('aria-disabled', 'true');
+          saveButton.textContent = '저장 중...';
+
+          try {
+            await saveFavoriteRoute(latestLoopRoute);
+            window.alert('즐겨찾기에 저장되었습니다.');
+          } catch (error) {
+            console.error(error);
+            window.alert(error.message || '즐겨찾기 저장에 실패했습니다.');
+          } finally {
+            setSaveButtonState(saveButton, true);
+          }
+        };
+
+        generateButton?.addEventListener('click', handleGenerate);
+        saveButton?.addEventListener('click', handleSaveFavorite);
+      };
+
+      const initMapbox = config => {
         if (!config.ACCESS_TOKEN) {
           console.warn('Mapbox ACCESS_TOKEN이 설정되지 않았습니다. MAPBOX_ACCESS_TOKEN 환경변수를 확인하세요.');
           return;
@@ -61,6 +781,11 @@
           console.error('지도 컨테이너를 찾을 수 없습니다.');
           return;
         }
+
+        if (container.dataset.initialized === 'true') {
+          return;
+        }
+        container.dataset.initialized = 'true';
 
         window.mapboxgl.accessToken = config.ACCESS_TOKEN;
 
@@ -79,6 +804,62 @@
           map.addControl(new window.mapboxgl.NavigationControl(), 'top-right');
           map.addControl(new window.mapboxgl.ScaleControl({ unit: 'metric' }));
         });
+
+        mapInstance = map;
+      };
+
+      document.addEventListener('DOMContentLoaded', () => {
+        initSidebarInteractions();
+
+        const configElement = document.getElementById('mapbox-config');
+        if (!configElement) {
+          console.error('Mapbox 설정을 찾을 수 없습니다.');
+          return;
+        }
+
+        let config;
+        try {
+          config = JSON.parse(configElement.textContent || '{}');
+        } catch (error) {
+          console.error('Mapbox 설정 파싱에 실패했습니다.', error);
+          return;
+        }
+
+        const favoriteDataElement = document.getElementById('favorite-data');
+        if (favoriteDataElement) {
+          try {
+            setFavoriteCache(JSON.parse(favoriteDataElement.textContent || '[]'));
+          } catch (error) {
+            console.error('즐겨찾기 데이터 파싱에 실패했습니다.', error);
+          }
+        }
+
+        initRouteDetailPanel();
+        initLoopRouteActions(config);
+        initFavoritePanelInteractions();
+
+        const initWhenReady = () => initMapbox(config);
+
+        if (window.mapboxgl) {
+          initWhenReady();
+          return;
+        }
+
+        const mapboxScript = document.getElementById('mapbox-gl-js');
+        if (mapboxScript) {
+          mapboxScript.addEventListener('load', initWhenReady, { once: true });
+          mapboxScript.addEventListener('error', () => {
+            console.error('Mapbox GL JS 로딩에 실패했습니다.');
+          }, { once: true });
+        } else {
+          window.addEventListener('load', () => {
+            if (window.mapboxgl) {
+              initWhenReady();
+            } else {
+              console.error('Mapbox GL JS를 불러오지 못했습니다.');
+            }
+          }, { once: true });
+        }
       });
     </script>
   </body>
