@@ -50,6 +50,7 @@ services:
       TZ: Asia/Seoul
     volumes:
       - ./data:/data
+      - ./data/graph-cache:/data/graph-cache
     ports:
       - "28989:8989"
     restart: unless-stopped
