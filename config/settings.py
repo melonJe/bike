@@ -242,14 +242,12 @@ _CONTENT_SECURITY_POLICY_DIRECTIVES = {
     'worker-src': ("'self'", 'blob:'),
 }
 
-CONTENT_SECURITY_POLICY = {
-    'directives': _CONTENT_SECURITY_POLICY_DIRECTIVES,
-}
+# CSP 설정 (django-csp >= 4.0)
+CONTENT_SECURITY_POLICY = _CONTENT_SECURITY_POLICY_DIRECTIVES
 
+# 개발 환경에서는 CSP 보고서만 전송하고 차단하지 않음
 if DEBUG:
-    CONTENT_SECURITY_POLICY_REPORT_ONLY = {
-        'directives': _CONTENT_SECURITY_POLICY_DIRECTIVES,
-    }
+    CONTENT_SECURITY_POLICY_REPORT_ONLY = True
 
 # 추가 보안 헤더
 SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
@@ -263,5 +261,3 @@ PERMISSIONS_POLICY = {
     'camera': '()',       # 카메라 비활성화
 }
 
-# 개발 환경에서는 CSP 보고서만 전송하고 차단하지 않음 (옵션)
-CSP_REPORT_ONLY = DEBUG
