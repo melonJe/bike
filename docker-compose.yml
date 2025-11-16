@@ -13,6 +13,9 @@ services:
     environment:
       POSTGRES_HOST: db
       GRAPHHOPPER_BASE_URL: http://graphhopper:8989
+    networks:
+      default:
+        ipv4_address: 172.20.2.30
     ports:
       - "28000:8000"
     volumes:
@@ -30,6 +33,9 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-bike_user}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bike_password}
       TZ: Asia/Seoul
+    networks:
+      default:
+        ipv4_address: 172.20.2.31
     ports:
       - "25432:5432"
     volumes:
@@ -48,12 +54,20 @@ services:
     environment:
       JAVA_OPTS: -Xmx4g -Xms4g
       TZ: Asia/Seoul
+    networks:
+      default:
+        ipv4_address: 172.20.2.32
     volumes:
       - ./data:/data
       - ./data/graph-cache:/data/graph-cache
     ports:
       - "28989:8989"
     restart: unless-stopped
+
+networks:
+  default:
+    external: true
+    name: melon-net
 
 volumes:
   db_data:
