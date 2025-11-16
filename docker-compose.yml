@@ -19,6 +19,7 @@ services:
     ports:
       - "28000:8000"
     volumes:
+      - static_volume:/app/staticfiles
       - ./:/app
     restart: unless-stopped
 
@@ -71,3 +72,5 @@ networks:
 
 volumes:
   db_data:
+  static_volume:
+    external: true
