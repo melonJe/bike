@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import os
-from copy import deepcopy
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -195,7 +194,7 @@ GRAPHHOPPER = {
 
 # Content Security Policy (CSP) 설정 (django-csp >= 4.0)
 # https://django-csp.readthedocs.io/en/latest/configuration.html
-_CONTENT_SECURITY_POLICY_DIRECTIVES = {
+_CSP_DIRECTIVES = {
     'default-src': ("'self'",),
     'script-src': (
         "'self'",
@@ -258,15 +257,28 @@ _CONTENT_SECURITY_POLICY_DIRECTIVES = {
     'worker-src': ("'self'", 'blob:'),
 }
 
-# CSP 설정 (django-csp >= 4.0)
-CONTENT_SECURITY_POLICY = None
-CONTENT_SECURITY_POLICY_REPORT_ONLY = None
+_DIRECTIVE_SETTING_MAP = {
+    'default-src': 'CSP_DEFAULT_SRC',
+    'script-src': 'CSP_SCRIPT_SRC',
+    'script-src-elem': 'CSP_SCRIPT_SRC_ELEM',
+    'style-src': 'CSP_STYLE_SRC',
+    'style-src-elem': 'CSP_STYLE_SRC_ELEM',
+    'img-src': 'CSP_IMG_SRC',
+    'font-src': 'CSP_FONT_SRC',
+    'connect-src': 'CSP_CONNECT_SRC',
+    'frame-src': 'CSP_FRAME_SRC',
+    'object-src': 'CSP_OBJECT_SRC',
+    'base-uri': 'CSP_BASE_URI',
+    'form-action': 'CSP_FORM_ACTION',
+    'frame-ancestors': 'CSP_FRAME_ANCESTORS',
+    'worker-src': 'CSP_WORKER_SRC',
+}
 
-if DEBUG:
-    # 개발 환경에서는 CSP 보고서만 전송하고 차단하지 않음
-    CONTENT_SECURITY_POLICY_REPORT_ONLY = deepcopy(_CONTENT_SECURITY_POLICY_DIRECTIVES)
-else:
-    CONTENT_SECURITY_POLICY = _CONTENT_SECURITY_POLICY_DIRECTIVES
+for directive, values in _CSP_DIRECTIVES.items():
+    globals()[_DIRECTIVE_SETTING_MAP[directive]] = values
+
+# 개발 환경에서는 보고 모드로만 동작
+CSP_REPORT_ONLY = DEBUG
 
 # 추가 보안 헤더
 SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
