@@ -1,0 +1,60 @@
+version: "3.9"
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: bike-django-web:latest
+    container_name: bike-django-web
+    depends_on:
+      - db
+      - graphhopper
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: db
+      GRAPHHOPPER_BASE_URL: http://graphhopper:8989
+    ports:
+      - "38000:8000"
+    volumes:
+      - ./:/app
+    restart: unless-stopped
+
+  db:
+    build:
+      context: ./db
+      dockerfile: Dockerfile.postgis
+    image: bike-postgis:latest
+    container_name: bike-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-bike}
+      POSTGRES_USER: ${POSTGRES_USER:-bike_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bike_password}
+      TZ: Asia/Seoul
+    ports:
+      - "35432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    restart: unless-stopped
+
+  graphhopper:
+    build:
+      context: ./graphhopper
+      dockerfile: Dockerfile.graphHopper
+      args:
+        GH_VERSION: "10.0"
+    image: graphhopper:10.0
+    container_name: graphhopper
+    environment:
+      JAVA_OPTS: -Xmx4g -Xms4g
+      TZ: Asia/Seoul
+    volumes:
+      - ./data:/data
+    ports:
+      - "38989:8989"
+    restart: unless-stopped
+
+volumes:
+  db_data:

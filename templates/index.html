@@ -1,0 +1,85 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bike App</title>
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <link
+      rel="stylesheet"
+      href="https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.css"
+      integrity="sha384-kIyr29M9F7RPNbwGLbW+tIapWIRD5smQ/RQxcsfP7JYpQm9lUPQsLkS4XBebqn3x"
+      crossorigin="anonymous"
+    />
+    {% if mapbox.ACCESS_TOKEN %}
+      <script
+        src="https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.js"
+        integrity="sha384-rXNUz1OjpWjnFzAsa/4XGPvajdrWlXvBoXGI+p/1c/bHv+I5F/vN0p3gsB/B0bkg"
+        crossorigin="anonymous"
+        defer
+      ></script>
+    {% endif %}
+  </head>
+  <body>
+    <main>
+      <h1>Bike App Frontend</h1>
+      <p>정적 자산과 템플릿이 Django에 포팅되었습니다.</p>
+      <section id="map" aria-label="Mapbox 지도">
+        <noscript>지도를 확인하려면 JavaScript를 활성화하세요.</noscript>
+      </section>
+    </main>
+    {{ mapbox|json_script:"mapbox-config" }}
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const configElement = document.getElementById('mapbox-config');
+        if (!configElement) {
+          console.error('Mapbox 설정을 찾을 수 없습니다.');
+          return;
+        }
+
+        let config;
+        try {
+          config = JSON.parse(configElement.textContent || '{}');
+        } catch (error) {
+          console.error('Mapbox 설정 파싱에 실패했습니다.', error);
+          return;
+        }
+
+        if (!config.ACCESS_TOKEN) {
+          console.warn('Mapbox ACCESS_TOKEN이 설정되지 않았습니다. MAPBOX_ACCESS_TOKEN 환경변수를 확인하세요.');
+          return;
+        }
+
+        if (!window.mapboxgl) {
+          console.error('Mapbox GL JS를 불러오지 못했습니다.');
+          return;
+        }
+
+        const container = document.getElementById('map');
+        if (!container) {
+          console.error('지도 컨테이너를 찾을 수 없습니다.');
+          return;
+        }
+
+        window.mapboxgl.accessToken = config.ACCESS_TOKEN;
+
+        const map = new window.mapboxgl.Map({
+          container,
+          style: config.STYLE_URL || 'mapbox://styles/mapbox/streets-v12',
+          center: [config.CENTER_LNG, config.CENTER_LAT],
+          zoom: config.ZOOM ?? 12,
+        });
+
+        map.on('load', () => {
+          new window.mapboxgl.Marker({ color: '#2563eb' })
+            .setLngLat([config.CENTER_LNG, config.CENTER_LAT])
+            .addTo(map);
+
+          map.addControl(new window.mapboxgl.NavigationControl(), 'top-right');
+          map.addControl(new window.mapboxgl.ScaleControl({ unit: 'metric' }));
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,50 @@
+########## 1️⃣ Builder 스테이지 ##########
+FROM eclipse-temurin:21-jdk AS builder
+WORKDIR /app
+
+# System deps for secure downloads
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends curl ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
+
+# GraphHopper version
+ARG GH_VERSION=10.0
+
+# Copy runtime config (pinned path in config.yml)
+COPY config.yml ./
+
+# Download GraphHopper JAR
+RUN set -eux; \
+  GH_JAR="graphhopper-web-${GH_VERSION}.jar"; \
+  curl -fL "https://repo1.maven.org/maven2/com/graphhopper/graphhopper-web/${GH_VERSION}/${GH_JAR}" -o "${GH_JAR}"; \
+  ln -s "${GH_JAR}" graphhopper-web.jar
+
+########## 2️⃣ 런타임 스테이지 ##########
+FROM eclipse-temurin:21-jre
+WORKDIR /app
+
+# 런타임 유틸리티
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends curl ca-certificates coreutils \
+  && rm -rf /var/lib/apt/lists/*
+
+# 실행 파일·설정 복사
+COPY --from=builder /app/graphhopper-web.jar ./graphhopper-web.jar
+COPY --from=builder /app/config.yml ./config.yml
+
+# 데이터 디렉토리 준비
+RUN mkdir -p /data/graph-cache
+
+# 비루트 사용자로 실행 (최소 권한 원칙)
+RUN useradd -r -u 10001 appuser \
+  && chown -R appuser:appuser /app /data
+USER 10001
+
+# 포트 노출
+EXPOSE 8989
+
+# 기본 환경
+ENV JAVA_OPTS="-Xmx4g -Xms4g"
+
+# 서버 실행 (JAVA_OPTS 적용을 위해 sh -lc 사용)
+CMD ["sh", "-lc", "exec java $JAVA_OPTS -jar ./graphhopper-web.jar server ./config.yml"]
