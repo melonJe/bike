@@ -284,9 +284,8 @@
       </section>
 
       <section class="map-area" aria-label="지도 영역">
-        <div id="map" aria-label="Mapbox 지도">
-          <noscript>지도를 확인하려면 JavaScript를 활성화하세요.</noscript>
-        </div>
+        <div id="map" aria-label="Mapbox 지도"></div>
+        <noscript class="noscript-map-fallback">지도를 확인하려면 JavaScript를 활성화하세요.</noscript>
       </section>
     </main>
     {{ favorites_json|json_script:"favorite-data" }}
