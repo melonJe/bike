@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
     image: bike-django-web:latest
-    container_name: bike-django-web
+    container_name: bike-web
     depends_on:
       - db
       - graphhopper
@@ -14,7 +14,7 @@ services:
       POSTGRES_HOST: db
       GRAPHHOPPER_BASE_URL: http://graphhopper:8989
     ports:
-      - "38000:8000"
+      - "28000:8000"
     volumes:
       - ./:/app
     restart: unless-stopped
@@ -31,7 +31,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bike_password}
       TZ: Asia/Seoul
     ports:
-      - "35432:5432"
+      - "25432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
       - ./db/init:/docker-entrypoint-initdb.d:ro
@@ -51,7 +51,7 @@ services:
     volumes:
       - ./data:/data
     ports:
-      - "38989:8989"
+      - "28989:8989"
     restart: unless-stopped
 
 volumes:
