@@ -99,9 +99,7 @@
               <strong>무료 사용자 안내</strong>
               <p>일일 3회 제한이 적용됩니다. Pro 이상 구독 시 무제한 생성이 가능합니다.</p>
             </div>
-            <div class="panel-actions">
               <button type="button" class="btn btn--primary" data-action="generate-loop-route">경로 생성하기</button>
-            </div>
             <p class="hint-text">생성된 경로 정보와 즐겨찾기 버튼은 오른쪽 패널에서 확인할 수 있습니다.</p>
             <div class="panel-card">
               <h3>사용법</h3>
@@ -859,6 +857,17 @@
               console.error('Mapbox GL JS를 불러오지 못했습니다.');
             }
           }, { once: true });
+        }
+
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker
+            .register('/sw.js')
+            .then(registration => {
+              console.log('ServiceWorker 등록 성공:', registration.scope);
+            })
+            .catch(error => {
+              console.error('ServiceWorker 등록 실패:', error);
+            });
         }
       });
     </script>

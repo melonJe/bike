@@ -16,6 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+from django.views.generic import TemplateView
 
 from rest_framework.routers import DefaultRouter
 
@@ -27,6 +28,7 @@ router = DefaultRouter()
 router.register('favorites', FavoriteRouteViewSet, basename='favorite-route')
 
 urlpatterns = [
+    path('sw.js', TemplateView.as_view(template_name='sw.js', content_type='application/javascript')),
     path('', FrontpageView.as_view()),
     path('admin/', admin.site.urls),
     path('api/paths/route/', RoundTripRouteView.as_view(), name='api-round-trip-route'),
