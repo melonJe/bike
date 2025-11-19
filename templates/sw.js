@@ -1,5 +1,11 @@
-const CACHE_VERSION = 'mapbox-tiles-v1';
-const MAPBOX_CACHE = `${CACHE_VERSION}`;
+const CACHE_PREFIX = 'mapbox-tiles';
+const CACHE_VERSION = (() => {
+  const now = new Date();
+  const year = now.getUTCFullYear();
+  const month = String(now.getUTCMonth() + 1).padStart(2, '0');
+  return `${CACHE_PREFIX}-${year}-${month}`;
+})();
+const MAPBOX_CACHE = CACHE_VERSION;
 const MAPBOX_ALLOWED_HOSTS = new Set(['api.mapbox.com', 'events.mapbox.com']);
 
 self.addEventListener('install', event => {
@@ -13,7 +19,7 @@ self.addEventListener('activate', event => {
       .then(keys =>
         Promise.all(
           keys
-            .filter(key => key.startsWith('mapbox-tiles-') && key !== MAPBOX_CACHE)
+            .filter(key => key.startsWith(`${CACHE_PREFIX}-`) && key !== MAPBOX_CACHE)
             .map(key => caches.delete(key)),
         ),
       )
