@@ -1,6 +1,13 @@
 'use strict';
 
 const MODES = ['circular', 'directions', 'popularity', 'favorites', 'history'];
+const BRAND_COLORS = Object.freeze({
+  primary: '#66bb6a',
+  secondary: '#2196f3',
+  warning: '#ff9800',
+  text: '#424242',
+  neutralBorder: '#e0e0e0',
+});
 const API_ENDPOINTS = {
   roundTrip: '/api/paths/route/',
   favorites: '/api/favorites/',
@@ -20,7 +27,7 @@ let endMarker = null;
 let mapContextMenu = null;
 let mapContextMenuPosition = null;
 const createMarkerWithClose = (options = {}) => {
-  const { color = '#2563eb', onRemove } = options;
+  const { color = BRAND_COLORS.secondary, onRemove } = options;
   const pinSize = 25;
   const closeButtonSize = 14;
   const closeButtonOffset = -4;
@@ -57,7 +64,7 @@ const createMarkerWithClose = (options = {}) => {
   close.style.borderRadius = '50%';
   close.style.border = 'none';
   close.style.backgroundColor = '#ffffff';
-  close.style.color = '#6b7280';
+  close.style.color = BRAND_COLORS.text;
   close.style.fontSize = '12px';
   close.style.lineHeight = `${closeButtonSize}px`;
   close.style.padding = '0';
@@ -83,7 +90,7 @@ const createMarkerWithClose = (options = {}) => {
 const ensureStartMarker = map => {
   if (startMarker || !startPoint) return;
   const element = createMarkerWithClose({
-    color: '#22c55e',
+    color: BRAND_COLORS.primary,
     onRemove: () => {
       if (startMarker) { startMarker.remove(); startMarker = null; }
       startPoint = null;
@@ -102,7 +109,7 @@ const ensureStartMarker = map => {
 const ensureEndMarker = map => {
   if (endMarker || !endPoint) return;
   const element = createMarkerWithClose({
-    color: '#ef4444',
+    color: BRAND_COLORS.warning,
     onRemove: () => {
       if (endMarker) { endMarker.remove(); endMarker = null; }
       endPoint = null;
@@ -461,7 +468,7 @@ const drawRouteOnMap = coordinates => {
         source: ROUTE_SOURCE_ID,
         layout: { 'line-cap': 'round', 'line-join': 'round' },
         paint: {
-          'line-color': '#2563eb',
+          'line-color': BRAND_COLORS.secondary,
           'line-width': 4,
           'line-opacity': 0.85,
         },
@@ -690,12 +697,12 @@ const initMapbox = config => {
         position: 'absolute',
         zIndex: '10000',
         backgroundColor: '#ffffff',
-        border: '1px solid #e5e7eb',
+        border: `1px solid ${BRAND_COLORS.neutralBorder}`,
         borderRadius: '0.375rem',
         boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)',
         padding: '4px 0',
         fontSize: '13px',
-        color: '#111827',
+        color: BRAND_COLORS.text,
         minWidth: '140px',
         display: 'none',
       });
@@ -705,7 +712,7 @@ const initMapbox = config => {
       header.style.alignItems = 'center';
       header.style.justifyContent = 'space-between';
       header.style.padding = '4px 8px 6px';
-      header.style.borderBottom = '1px solid #e5e7eb';
+      header.style.borderBottom = `1px solid ${BRAND_COLORS.neutralBorder}`;
 
       const createHeaderItem = (label, color) => {
         const btn = document.createElement('button');
@@ -718,7 +725,7 @@ const initMapbox = config => {
         btn.style.cursor = 'pointer';
         btn.style.padding = '2px 4px';
         btn.style.fontSize = '12px';
-        btn.style.color = '#374151';
+        btn.style.color = BRAND_COLORS.text;
 
         const dot = document.createElement('span');
         dot.style.display = 'inline-block';
@@ -735,8 +742,8 @@ const initMapbox = config => {
         return btn;
       };
 
-      const startHeaderButton = createHeaderItem('출발', '#22c55e');
-      const endHeaderButton = createHeaderItem('도착', '#ef4444');
+      const startHeaderButton = createHeaderItem('출발', BRAND_COLORS.primary);
+      const endHeaderButton = createHeaderItem('도착', BRAND_COLORS.warning);
 
       startHeaderButton.addEventListener('click', () => {
         if (!mapContextMenuPosition) return;
