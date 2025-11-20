@@ -13,6 +13,141 @@ let routeDetailFields = {};
 let routeDetailSaveButton = null;
 let favoriteCache = [];
 
+let startPoint = null;
+let endPoint = null;
+let startMarker = null;
+let endMarker = null;
+let mapContextMenu = null;
+let mapContextMenuPosition = null;
+const createMarkerWithClose = (options = {}) => {
+  const { color = '#2563eb', onRemove } = options;
+  const pinSize = 25;
+  const closeButtonSize = 14;
+  const closeButtonOffset = -4;
+
+  // 기본 Mapbox 핀 스타일을 모방한 DOM 요소 생성
+  const wrapper = document.createElement('div');
+  wrapper.style.position = 'relative';
+  wrapper.style.width = `${pinSize}px`;
+  wrapper.style.height = `${pinSize}px`;
+  wrapper.style.cursor = 'pointer';
+
+  // 핀 본체 (Mapbox 기본 핀과 유사한 모양)
+  const pin = document.createElement('div');
+  pin.style.width = `${pinSize}px`;
+  pin.style.height = `${pinSize}px`;
+  pin.style.backgroundColor = color;
+  pin.style.borderRadius = '50% 50% 50% 0';
+  pin.style.transform = 'rotate(-45deg)';
+  pin.style.border = '2px solid #ffffff';
+  pin.style.boxShadow = '0 2px 4px rgba(0,0,0,0.15)';
+  pin.style.position = 'absolute';
+  pin.style.top = '0';
+  pin.style.left = '0';
+
+  // X 버튼
+  const close = document.createElement('button');
+  close.type = 'button';
+  close.textContent = '×';
+  close.style.position = 'absolute';
+  close.style.top = `${closeButtonOffset}px`;
+  close.style.right = `${closeButtonOffset}px`;
+  close.style.width = `${closeButtonSize}px`;
+  close.style.height = `${closeButtonSize}px`;
+  close.style.borderRadius = '50%';
+  close.style.border = 'none';
+  close.style.backgroundColor = '#ffffff';
+  close.style.color = '#6b7280';
+  close.style.fontSize = '12px';
+  close.style.lineHeight = `${closeButtonSize}px`;
+  close.style.padding = '0';
+  close.style.cursor = 'pointer';
+  close.style.boxShadow = '0 1px 3px rgba(0,0,0,0.2)';
+  close.style.display = 'none';
+  close.style.transform = 'rotate(0deg)';
+  close.style.zIndex = '1000';
+
+  // 이벤트 리스너
+  wrapper.addEventListener('mouseenter', () => { close.style.display = 'block'; });
+  wrapper.addEventListener('mouseleave', () => { close.style.display = 'none'; });
+  close.addEventListener('click', event => {
+    event.stopPropagation();
+    if (typeof onRemove === 'function') { onRemove(); }
+  });
+
+  wrapper.appendChild(pin);
+  wrapper.appendChild(close);
+  return wrapper;
+};
+
+const ensureStartMarker = map => {
+  if (startMarker || !startPoint) return;
+  const element = createMarkerWithClose({
+    color: '#22c55e',
+    onRemove: () => {
+      if (startMarker) { startMarker.remove(); startMarker = null; }
+      startPoint = null;
+    },
+  });
+  startMarker = new window.mapboxgl.Marker({ element, draggable: true, anchor: 'bottom' })
+    .setLngLat([startPoint.lng, startPoint.lat])
+    .addTo(map);
+
+  startMarker.on('dragend', () => {
+    const lngLat = startMarker.getLngLat();
+    startPoint = { lng: lngLat.lng, lat: lngLat.lat };
+  });
+};
+
+const ensureEndMarker = map => {
+  if (endMarker || !endPoint) return;
+  const element = createMarkerWithClose({
+    color: '#ef4444',
+    onRemove: () => {
+      if (endMarker) { endMarker.remove(); endMarker = null; }
+      endPoint = null;
+    },
+  });
+  endMarker = new window.mapboxgl.Marker({ element, draggable: true, anchor: 'bottom' })
+    .setLngLat([endPoint.lng, endPoint.lat])
+    .addTo(map);
+
+  endMarker.on('dragend', () => {
+    const lngLat = endMarker.getLngLat();
+    endPoint = { lng: lngLat.lng, lat: lngLat.lat };
+  });
+};
+
+const updateStartPointOnMap = (map, coords) => {
+  if (!map || !coords) {
+    return;
+  }
+  const { lng, lat } = coords;
+  if (typeof lng !== 'number' || Number.isNaN(lng) || typeof lat !== 'number' || Number.isNaN(lat)) {
+    return;
+  }
+  startPoint = { lng, lat };
+  ensureStartMarker(map);
+  if (startMarker) {
+    startMarker.setLngLat([lng, lat]);
+  }
+};
+
+const resolveUserLocation = () =>
+  new Promise(resolve => {
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+      resolve(null);
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        resolve({ lng: position.coords.longitude, lat: position.coords.latitude });
+      },
+      () => resolve(null),
+      { enableHighAccuracy: true, timeout: 7000, maximumAge: 60000 },
+    );
+  });
+
 const defaultRouteDetailContent = {
   name: '루프 경로',
   distance: '-- km',
@@ -383,9 +518,12 @@ const initLoopRouteActions = config => {
   const handleGenerate = async () => {
     if (!durationInput) return;
     const minutes = Math.max(1, parseInt(durationInput.value, 10) || 30);
-    const center = mapInstance?.getCenter();
-    const lat = center?.lat ?? Number(config.CENTER_LAT);
-    const lon = center?.lng ?? Number(config.CENTER_LNG);
+    if (!startPoint) {
+      window.alert('시작 위치를 설정해 주세요.');
+      return;
+    }
+    const lat = startPoint.lat;
+    const lon = startPoint.lng;
 
     setSaveButtonState(saveButton, false);
     latestLoopRoute = null;
@@ -525,12 +663,128 @@ const initMapbox = config => {
   });
 
   map.on('load', () => {
-    new window.mapboxgl.Marker({ color: '#2563eb' })
-      .setLngLat([config.CENTER_LNG, config.CENTER_LAT])
-      .addTo(map);
+    const defaultLng = Number(config.CENTER_LNG);
+    const defaultLat = Number(config.CENTER_LAT);
+
+    endPoint = null;
+
+    resolveUserLocation()
+      .then(location => {
+        if (location) {
+          updateStartPointOnMap(map, location);
+        } else {
+          updateStartPointOnMap(map, { lng: defaultLng, lat: defaultLat });
+        }
+      })
+      .catch(() => {
+        updateStartPointOnMap(map, { lng: defaultLng, lat: defaultLat });
+      });
 
     map.addControl(new window.mapboxgl.NavigationControl(), 'top-right');
     map.addControl(new window.mapboxgl.ScaleControl({ unit: 'metric' }));
+
+    if (!mapContextMenu) {
+      const menu = document.createElement('div');
+      menu.className = 'map-context-menu';
+      Object.assign(menu.style, {
+        position: 'absolute',
+        zIndex: '10000',
+        backgroundColor: '#ffffff',
+        border: '1px solid #e5e7eb',
+        borderRadius: '0.375rem',
+        boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)',
+        padding: '4px 0',
+        fontSize: '13px',
+        color: '#111827',
+        minWidth: '140px',
+        display: 'none',
+      });
+
+      const header = document.createElement('div');
+      header.style.display = 'flex';
+      header.style.alignItems = 'center';
+      header.style.justifyContent = 'space-between';
+      header.style.padding = '4px 8px 6px';
+      header.style.borderBottom = '1px solid #e5e7eb';
+
+      const createHeaderItem = (label, color) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.style.display = 'inline-flex';
+        btn.style.alignItems = 'center';
+        btn.style.gap = '4px';
+        btn.style.border = 'none';
+        btn.style.background = 'transparent';
+        btn.style.cursor = 'pointer';
+        btn.style.padding = '2px 4px';
+        btn.style.fontSize = '12px';
+        btn.style.color = '#374151';
+
+        const dot = document.createElement('span');
+        dot.style.display = 'inline-block';
+        dot.style.width = '8px';
+        dot.style.height = '8px';
+        dot.style.borderRadius = '9999px';
+        dot.style.backgroundColor = color;
+
+        const text = document.createElement('span');
+        text.textContent = label;
+
+        btn.appendChild(dot);
+        btn.appendChild(text);
+        return btn;
+      };
+
+      const startHeaderButton = createHeaderItem('출발', '#22c55e');
+      const endHeaderButton = createHeaderItem('도착', '#ef4444');
+
+      startHeaderButton.addEventListener('click', () => {
+        if (!mapContextMenuPosition) return;
+        updateStartPointOnMap(map, mapContextMenuPosition);
+        menu.style.display = 'none';
+      });
+
+      endHeaderButton.addEventListener('click', () => {
+        if (!mapContextMenuPosition) return;
+        endPoint = { lng: mapContextMenuPosition.lng, lat: mapContextMenuPosition.lat };
+        ensureEndMarker(map);
+        if (endMarker) {
+          endMarker.setLngLat([endPoint.lng, endPoint.lat]);
+        }
+        menu.style.display = 'none';
+      });
+
+      header.appendChild(startHeaderButton);
+      header.appendChild(endHeaderButton);
+
+      menu.appendChild(header);
+      document.body.appendChild(menu);
+      mapContextMenu = menu;
+
+      document.addEventListener('click', event => {
+        if (!mapContextMenu) return;
+        if (event.target instanceof Node && mapContextMenu.contains(event.target)) {
+          return;
+        }
+        mapContextMenu.style.display = 'none';
+      });
+    }
+
+    map.on('contextmenu', event => {
+      if (!mapContextMenu) return;
+      event.preventDefault();
+      mapContextMenuPosition = event.lngLat ? { lng: event.lngLat.lng, lat: event.lngLat.lat } : null;
+      if (!mapContextMenuPosition) return;
+
+      const { clientX, clientY } = event.originalEvent || {};
+      if (typeof clientX !== 'number' || typeof clientY !== 'number') {
+        return;
+      }
+
+      mapContextMenu.style.left = `${clientX}px`;
+      mapContextMenu.style.top = `${clientY}px`;
+      mapContextMenu.style.display = 'block';
+    });
   });
 
   mapInstance = map;
